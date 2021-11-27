@@ -10,12 +10,13 @@ $ pip3 install -r requirements.txt
 $ python3 server.py runserver 0.0.0.0:8000
 ```
 
-## Using `curl` to perform client request
+## Ask for the result of fibonacci at N order
 ```bash
-$ curl http://localhost:8000/rest/fibonacci
+$ curl -X POST http://localhost:8000/rest/fibonacci 
+    -d '{"order":N}'
 ```
-Or you can use `http` to send request
+
+## Get a list of history fibonacci requests sent before
 ```bash
-$ sudo apt-get install httpie
-$ http --json http://localhost:8000/rest/fibonacci
+$ curl http://localhost:8000/rest/logs
 ```
