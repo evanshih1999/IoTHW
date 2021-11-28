@@ -17,6 +17,11 @@ $ pip3 install -r requirements.txt
 $ make
 ```
 
+- Run the eclipse mosquitto docker container
+```bash
+$ docker run -d -it -p 1883:1883 -v $(pwd)/mosquitto.conf:/mosquitto/config/mosquitto.conf eclipse-mosquitto
+```
+
 - Start the gRPC services
 ```bash
 $ python3 fibonacci.py --ip 0.0.0.0 --port 8080

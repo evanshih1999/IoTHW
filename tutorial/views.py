@@ -17,6 +17,9 @@ import fib_pb2_grpc
 import log_pb2
 import log_pb2_grpc
 
+import psutil
+import paho.mqtt.client as mqtt
+
 # Create your views here.
 class FibonacciView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -25,6 +28,12 @@ class FibonacciView(APIView):
         decoded = request.body.decode('utf-8')
         body = json.loads(decoded)
         order = body['order']
+
+        client = mqtt.Client()
+        client.connect(host='127.0.0.1', port=1883)
+        client.loop_start()
+        client.publish(topic='order', payload=order)
+        client.loop_stop()
 
         host = f"{'127.0.0.1'}:{'8080'}"
         print(host)

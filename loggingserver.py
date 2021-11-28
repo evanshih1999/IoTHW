@@ -10,6 +10,10 @@ from concurrent import futures
 import log_pb2
 import log_pb2_grpc
 
+import psutil
+import paho.mqtt.client as mqtt
+
+history = []
 
 class LogCalculatorServicer(log_pb2_grpc.LogCalculatorServicer):
 
@@ -17,29 +21,17 @@ class LogCalculatorServicer(log_pb2_grpc.LogCalculatorServicer):
         pass
 
     def Compute(self, request, context):
-        history = [1,2,3,4,5,6,7,8,9,10]
 
         response = log_pb2.LogResponse()
         response.history.extend(history)
 
         return response
 
-    def _fibonacci(self, n):
-        a = 0
-        b = 1
-        if n < 0:
-            return 0
-        elif n == 0:
-            return 0
-        elif n == 1:
-            return b
-        else:
-            for i in range(1, n):
-                c = a + b
-                a = b
-                b = c
-            return b
-
+def on_message(client, obj, msg):
+    order = str(msg.payload)
+    order = order[2:-1]
+    print(order)
+    history.append(int(order))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -51,10 +43,16 @@ if __name__ == "__main__":
     servicer = LogCalculatorServicer()
     log_pb2_grpc.add_LogCalculatorServicer_to_server(servicer, server)
 
+    client = mqtt.Client()
+    client.on_message = on_message
+    client.connect(host='127.0.0.1', port=1883)
+    client.subscribe('order', 0)
+
     try:
+        client.loop_start()
         server.add_insecure_port(f"{args['ip']}:{args['port']}")
         server.start()
         print(f"Run gRPC Server at {args['ip']}:{args['port']}")
         server.wait_for_termination()
     except KeyboardInterrupt:
-        pass
+        client.loop_stop()
